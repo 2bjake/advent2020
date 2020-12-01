@@ -15,6 +15,17 @@ func findTwoProduct(in values: [Int], forSum sum: Int) -> Int? {
     return nil
 }
 
+func findTwoProductLinear(in values: [Int], forSum sum: Int) -> Int? {
+    let values = Set(values)
+    for value in values {
+        let rest = sum - value
+        if values.contains(rest) {
+            return value * rest
+        }
+    }
+    return nil
+}
+
 func moveIdxWithSmallestDiff(in values: [Int], front: inout Int, back: inout Int) {
     let nextFront = front + 1
     let nextBack = back - 1
@@ -50,5 +61,5 @@ func findThreeProduct(in values: [Int], forSum sum: Int) -> Int? {
     return nil
 }
 
-print("Part 1 answer: \(findTwoProduct(in: buildInput(), forSum: 2020)!)")
-print("Part 2 answer: \(findThreeProduct(in: buildInput(), forSum: 2020)!)")
+print("Part 1 answer: \(findTwoProductLinear(in: buildInput(), forSum: 2020)!)") //888331
+print("Part 2 answer: \(findThreeProduct(in: buildInput(), forSum: 2020)!)") //130933530
