@@ -46,7 +46,7 @@ extension Entry {
 
 // string parse init
 extension Entry {
-    init?(_ str: String) {
+    init?<S: StringProtocol>(_ str: S) {
         guard let entry = splitEntryBuilder(str) else {
             return nil
         }
@@ -54,7 +54,7 @@ extension Entry {
     }
 }
 
-private func splitEntryBuilder(_ str: String) -> Entry? {
+private func splitEntryBuilder<S: StringProtocol>(_ str: S) -> Entry? {
     let groups = str.split(separator: " ")
     guard groups.count == 3 else { return nil }
 

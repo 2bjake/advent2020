@@ -1,14 +1,12 @@
 import Foundation
 
-func validCount(in lines: [String], where predicate: (Entry) -> Bool) -> Int {
-    lines.compactMap(Entry.init).filter(predicate).count
+extension Array {
+    func count(where predicate: (Element) -> Bool) -> Int {
+        filter(predicate).count
+    }
 }
 
-let lines = input.split(separator: "\n").map(String.init)
+let entries = input.split(separator: "\n").compactMap(Entry.init)
 
-let partOneCount = validCount(in: lines, where: \.isValidForPartOne)
-print("valid count for part one: \(partOneCount))") // 586
-
-let partTwoCount = validCount(in: lines, where: \.isValidForPartTwo)
-print("valid count for part two: \(partTwoCount)") // 352
-
+print("valid count for part one: \(entries.count(where: \.isValidForPartOne))") // 586
+print("valid count for part two: \(entries.count(where: \.isValidForPartTwo))") // 352
