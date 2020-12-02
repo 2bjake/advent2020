@@ -1,6 +1,6 @@
 import Foundation
 
-extension Array {
+extension Sequence {
     func count(where predicate: (Element) -> Bool) -> Int {
         filter(predicate).count
     }

@@ -16,30 +16,22 @@ struct Entry {
 
 // extension for part 1
 extension Entry {
-    private var occuranceRange: ClosedRange<Int> {
-        firstInt...secondInt
-    }
+    private var occuranceRange: ClosedRange<Int> { firstInt...secondInt }
 
     var isValidForPartOne: Bool {
-        let count = password.filter { $0 == character }.count
+        let count = password.count { $0 == character }
         return occuranceRange.contains(count)
     }
 }
 
 // extension for part 2
 extension Entry {
-    private var firstPosition: Int {
-        firstInt - 1
-    }
-
-    private var secondPosition: Int {
-        secondInt - 1
-    }
+    private var firstPosition: Int { firstInt - 1 }
+    private var secondPosition: Int { secondInt - 1 }
 
     var isValidForPartTwo: Bool {
         let firstChar = password.dropFirst(firstPosition).first
         let secondChar = password.dropFirst(secondPosition).first
-
         return (firstChar == character || secondChar == character) && firstChar != secondChar
     }
 }
