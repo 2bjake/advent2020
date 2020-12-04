@@ -15,7 +15,7 @@ func hasRequiredFields(_ fields: [String: String]) -> Bool {
 
 // part 2
 
-func isYear(_ year: String, within range: ClosedRange<Int>) -> Bool {
+func isValidYear(_ year: String, within range: ClosedRange<Int>) -> Bool {
     return range.contains(Int(year) ?? -1)
 }
 
@@ -46,9 +46,9 @@ func hasValidFields(_ fields: [String: String]) -> Bool {
     guard hasRequiredFields(fields) else { return false }
     for field in fields {
         switch field.key {
-            case "byr": guard isYear(field.value, within: 1920...2002) else { return false }
-            case "iyr": guard isYear(field.value, within: 2010...2020) else { return false }
-            case "eyr": guard isYear(field.value, within: 2020...2030) else { return false }
+            case "byr": guard isValidYear(field.value, within: 1920...2002) else { return false }
+            case "iyr": guard isValidYear(field.value, within: 2010...2020) else { return false }
+            case "eyr": guard isValidYear(field.value, within: 2020...2030) else { return false }
             case "hgt": guard isValidHeight(field.value) else { return false }
             case "hcl": guard isValidHairColor(field.value) else { return false }
             case "ecl": guard isValidEyeColor(field.value) else { return false }
@@ -65,7 +65,7 @@ typealias Validator = (String) -> Bool
 
 func makeYearValidator(with range: ClosedRange<Int>) -> Validator {
     return { year in
-        return isYear(year, within: range)
+        return isValidYear(year, within: range)
     }
 }
 

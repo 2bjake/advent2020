@@ -6,7 +6,7 @@
 //
 
 func isValidPartTwoFieldsOrig(_ fields: [String: String]) -> Bool {
-    func isYear(at field: String, within range: ClosedRange<Int>) -> Bool {
+    func isValidYear(at field: String, within range: ClosedRange<Int>) -> Bool {
         guard let year = Int(fields[field, default: ""]) else { return false }
         return range.contains(year)
     }
@@ -37,9 +37,9 @@ func isValidPartTwoFieldsOrig(_ fields: [String: String]) -> Bool {
         return id.count == 9 && Int(id) != nil
     }
 
-    return isYear(at: "byr", within: 1920...2002) &&
-        isYear(at: "iyr", within: 2010...2020) &&
-        isYear(at: "eyr", within: 2020...2030) &&
+    return isValidYear(at: "byr", within: 1920...2002) &&
+        isValidYear(at: "iyr", within: 2010...2020) &&
+        isValidYear(at: "eyr", within: 2020...2030) &&
         isHeightValid() &&
         isHairColorValid() &&
         isEyeColorValid() &&
