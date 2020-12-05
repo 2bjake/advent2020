@@ -43,10 +43,10 @@ print("answer to part two: \(findMissingSeat(in: seatIds))")
 /// Alt: Define "find missing" as a generic method on Collection. There's nothing seat-specific about the algorithm.
 
 extension Collection where Element: Comparable & Strideable {
-    /// Returns the first value that is not present in the `Sequence`
+    /// Returns the first value that is not present in the `Collection`
     /// while traversing `Element`s in order of value.
     ///
-    /// Complexity: O(n log n), where n is the length of the sequence.
+    /// Complexity: O(n log n), where n is the length of the collection.
     func findFirstMissing() -> Element? where Element.Stride: ExpressibleByIntegerLiteral {
         let ordered = sorted()
         for i in 0..<(ordered.count - 1) {
@@ -75,10 +75,10 @@ print("answer to part two: \(findMissingSeatWitRange(in: seatIds))")
 /// Alt: O(n) solution on Collection
 
 extension Collection where Element: Hashable & Strideable {
-    /// Returns the first value that is not present in the `Sequence`
+    /// Returns the first value that is not present in the `Collection`
     /// while traversing `Element`s in order of value.
     ///
-    /// Complexity: O(n), where n is the length of the sequence.
+    /// Complexity: O(n), where n is the length of the collection.
     func findFirstMissingLinear() -> Element? where Element.Stride: SignedInteger {
         guard let lowerBound = self.min(),
               let upperBound = self.max() else { return nil }
