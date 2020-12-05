@@ -63,14 +63,14 @@ print("answer to part two: \(seatIds.findFirstMissing())")
 
 /// Alt: Use subtraction from range to find missing value - O(n) solution
 
-func findMissingSeatWitRange(in seatIds: [Int]) -> Int? {
+func findMissingSeatLinear(in seatIds: [Int]) -> Int? {
     guard let lowerBound = seatIds.min(),
           let upperBound = seatIds.max() else { return nil }
 
     return Set(lowerBound...upperBound).subtracting(seatIds).min()
 }
 
-print("answer to part two: \(findMissingSeatWitRange(in: seatIds))")
+print("answer to part two: \(findMissingSeatLinear(in: seatIds))")
 
 /// Alt: O(n) solution on Collection
 
