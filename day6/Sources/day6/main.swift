@@ -2,34 +2,25 @@ import Foundation
 
 let entries = input.components(separatedBy: "\n\n")
 
-// part 1
-let answers = entries.map { group in
-    group.split(separator: "\n").flatMap(Array.init)
-}
+typealias Group = (size: Int, answers: [Character])
 
-let partOneCount = answers.map(Set.init).map(\.count).reduce(0, +)
-print("The answer to part one: \(partOneCount)")
-
-// part 2
-
-extension Sequence {
-    func count(where predicate: (Element) throws -> Bool) rethrows -> Int {
-        try filter(predicate).count
-    }
-}
-
-typealias Group = (groupSize: Int, answers: [Character])
-
-let groups: [Group] = entries.map { group in
-    let lines = group.split(separator: "\n")
+let groups: [Group] = entries.map {
+    let lines = $0.split(separator: "\n")
     return (lines.count, lines.flatMap(Array.init))
 }
 
-let partTwoCount = groups.map { groupSize, answers in
-    answers.reduce(into: [:]) { result, value in
-        result[value, default: 0] += 1
-    }.count { $0.value == groupSize }
-}.reduce(0, +)
+// part 1
+let partOneCount = groups.map { Set($0.answers).count }.reduce(0, +)
+print("The answer to part one: \(partOneCount)") // 6437
 
-print("The answer to part two: \(partTwoCount)")
+// part 2
+func countCommonAnswers(in group: Group) -> Int {
+    let answerCounts = group.answers.reduce(into: [:]) { result, value in
+        result[value, default: 0] += 1
+    }
+    return answerCounts.filter { $0.value == group.size }.count
+}
+
+let partTwoCount = groups.map(countCommonAnswers).reduce(0, +)
+print("The answer to part two: \(partTwoCount)") // 3229
 
