@@ -23,4 +23,3 @@ func countCommonAnswers(in group: Group) -> Int {
 
 let partTwoCount = groups.map(countCommonAnswers).reduce(0, +)
 print("The answer to part two: \(partTwoCount)") // 3229
-
