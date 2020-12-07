@@ -17,12 +17,11 @@ print("answer to part one: \(ancestors.count)") // 372
 
 
 // part two
-func calculateCount(for bag: Bag) -> Int {
+func countDescendants(of bag: Bag) -> Int {
     bag.contents.reduce(0) { result, content in
         guard let child = registry.retrieveBag(withColor: content.color) else { return result }
-        return result + content.count * (calculateCount(for: child) + 1)
+        return result + content.count * (countDescendants(of: child) + 1)
     }
 }
 
-print("answer to part two: \(calculateCount(for: registry.shinyGoldBag))") // 8015
-
+print("answer to part two: \(countDescendants(of: registry.shinyGoldBag))") // 8015

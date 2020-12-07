@@ -32,7 +32,7 @@ extension Bag {
     }
 
     static func build<S: StringProtocol>(_ line: S) -> Bag? {
-        let regex = try? Regex(pattern: "(.*) bags contain (.*).", groupNames: color, contents)
+        let regex = try? Regex(pattern: "(.*) bags contain (.*)\\.", groupNames: color, contents)
         let match = regex?.findFirst(in: String(line))
         guard let color = match?.group(named: color), let contents = match?.group(named: contents) else {
             return nil

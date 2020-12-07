@@ -4,37 +4,38 @@
 //
 //  Created by Jake Foster on 12/7/20.
 //
+import Foundation
 
 struct BagRegistry {
     typealias Color = String
 
-    private let bags: [Color: Bag]
-    private var parents: [Color: Set<Color>] = [:]
+    private let bagByColor: [Color: Bag]
+    private let parentsByChild: [Color: Set<Color>]
 
     var shinyGoldBag: Bag { retrieveBag(withColor: "shiny gold")! }
 
     init(bags: [Bag]) {
-        self.bags = bags.reduce(into: [:]) { result, value in
+        bagByColor = bags.reduce(into: [:]) { result, value in
             result[value.color] = value
         }
-        calulateParents()
+        parentsByChild = Self.calculateParentsByChild(for: Array(bagByColor.values))
     }
 
-    private mutating func calulateParents() {
-        for parent in bags.values {
-            for content in parent.contents {
-                if let child = bags[content.color] {
-                    parents[child.color, default: []].insert(parent.color)
-                }
+    private static func calculateParentsByChild(for bags: [Bag]) -> [Color: Set<Color>] {
+        var result = [Color: Set<Color>]()
+        for parent in bags {
+            for (_, childColor) in parent.contents {
+                result[childColor, default: []].insert(parent.color)
             }
         }
+        return result
     }
 
     func retrieveParents(of child: Bag) -> [Bag] {
-        parents[child.color]?.compactMap { bags[$0] } ?? []
+        parentsByChild[child.color]?.compactMap { bagByColor[$0] } ?? []
     }
 
     func retrieveBag(withColor color: Color) -> Bag? {
-        bags[color]
+        bagByColor[color]
     }
 }
