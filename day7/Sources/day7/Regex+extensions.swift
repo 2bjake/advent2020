@@ -8,7 +8,7 @@
 import Regex
 
 enum Group: String {
-    case color, contents
+    case count, color, contents
 }
 
 extension Match {

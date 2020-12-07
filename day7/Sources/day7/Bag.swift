@@ -5,14 +5,16 @@
 //  Created by Jake Foster on 12/7/20.
 //
 
+typealias Content = (count: Int, color: String)
+
 class Bag {
     let color: String
-    let canContain: [String]
+    let contains: [Content]
     var parents: Set<Bag> = []
 
-    init(color: String, canContain: [String]) {
+    init(color: String, contains: [Content]) {
         self.color = color
-        self.canContain = canContain
+        self.contains = contains
     }
 }
 
@@ -38,8 +40,8 @@ struct BagRegistry {
 
     func calulateParents() {
         for parent in bags.values {
-            for childColor in parent.canContain {
-                if let child = bags[childColor] {
+            for childContent in parent.contains {
+                if let child = bags[childContent.color] {
                     child.parents.insert(parent)
                 }
             }
