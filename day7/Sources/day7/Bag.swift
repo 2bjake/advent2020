@@ -1,50 +1,42 @@
 //
 //  Bag.swift
-//  
+//
 //
 //  Created by Jake Foster on 12/7/20.
 //
 
-typealias Content = (count: Int, color: String)
+import Regex
 
-class Bag {
+struct Bag {
+    typealias Content = (count: Int, color: String)
+
     let color: String
-    let contains: [Content]
-    var parents: Set<Bag> = []
-
-    init(color: String, contains: [Content]) {
-        self.color = color
-        self.contains = contains
-    }
+    let contents: [Content]
 }
 
-extension Bag: Hashable {
-    static func == (lhs: Bag, rhs: Bag) -> Bool {
-        lhs.color == rhs.color
-    }
+extension Bag {
+    // group name constants
+    private static let color = "color"
+    private static let count = "count"
+    private static let contents = "contents"
 
-    func hash(into hasher: inout Hasher) {
-        hasher.combine(color)
-    }
-}
-
-struct BagRegistry {
-    var bags: [String: Bag]
-
-    init(bags: [Bag]) {
-        self.bags = bags.reduce(into: [:]) { result, value in
-            result[value.color] = value
-        }
-        calulateParents()
-    }
-
-    func calulateParents() {
-        for parent in bags.values {
-            for childContent in parent.contains {
-                if let child = bags[childContent.color] {
-                    child.parents.insert(parent)
-                }
+    private static func buildBagContents(_ str: String) -> [Content] {
+        return str.split(using: "[.,]".r).compactMap {
+            let regex = try? Regex(pattern: "(\\d+) (.*) bags?", groupNames: count, color)
+            let match = regex?.findFirst(in: $0)
+            guard let count = Int(match?.group(named: count) ?? ""), let color = match?.group(named: color) else {
+                return nil
             }
+            return (count, color)
         }
+    }
+
+    static func build<S: StringProtocol>(_ line: S) -> Bag? {
+        let regex = try? Regex(pattern: "(.*) bags contain (.*).", groupNames: color, contents)
+        let match = regex?.findFirst(in: String(line))
+        guard let color = match?.group(named: color), let contents = match?.group(named: contents) else {
+            return nil
+        }
+        return Bag(color: color, contents: buildBagContents(contents))
     }
 }

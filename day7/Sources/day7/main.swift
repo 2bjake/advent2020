@@ -1,58 +1,30 @@
 import Foundation
-import Regex
 
-func getContentColors(_ str: String) -> [Content] {
-    return str.split(using: "[.,]".r).compactMap {
-        let regex = try? Regex(pattern: "(\\d+) (.*) bags?", groups: .count, .color)
-        let match = regex?.findFirst(in: $0)
-        guard let count = Int(match?.group(.count) ?? ""), let color = match?.group(.color) else {
-            return nil
-        }
-        return (count, color)
-    }
-}
-
-func buildBag<S: StringProtocol>(_ line: S) -> Bag? {
-    let regex = try? Regex(pattern: "(.*) bags contain (.*).", groups: .color, .contents)
-    let match = regex?.findFirst(in: String(line))
-    guard let color = match?.group(.color), let contents = match?.group(.contents) else {
-        return nil
-    }
-    return Bag(color: color, contains: getContentColors(contents))
-}
-
-let registry = BagRegistry(bags: input.split(separator: "\n").compactMap(buildBag))
+let registry = BagRegistry(bags: input.split(separator: "\n").compactMap(Bag.build))
 
 func partOne() {
-    var ancestors: Set<Bag> = []
+    var ancestors: Set<String> = []
+
     func collectAncestors(of bag: Bag) {
-        for parent in bag.parents {
-            ancestors.insert(parent)
+        for parent in registry.retrieveParents(of: bag) {
+            ancestors.insert(parent.color)
             collectAncestors(of: parent)
         }
     }
 
-    collectAncestors(of: registry.bags["shiny gold"]!)
-    print(ancestors.count)
+    collectAncestors(of: registry.shinyGoldBag)
+    print("answer to part one: \(ancestors.count)") // 372
 }
 partOne()
 
 func partTwo() {
     func calculateCount(for bag: Bag) -> Int {
-        var count = 0
-        for childContent in bag.contains {
-            if let child = registry.bags[childContent.color] {
-                count += childContent.count * (calculateCount(for: child) + 1)
-            }
+        bag.contents.reduce(0) { result, content in
+            guard let child = registry.retrieveBag(withColor: content.color) else { return result }
+            return result + content.count * (calculateCount(for: child) + 1)
         }
-        return count
     }
 
-    print(calculateCount(for: registry.bags["shiny gold"]!))
+    print("answer to part two: \(calculateCount(for: registry.shinyGoldBag))") // 8015
 }
-
 partTwo()
-
-
-
-
