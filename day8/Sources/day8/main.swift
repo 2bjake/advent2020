@@ -2,73 +2,75 @@ import Foundation
 
 struct Instruction {
     enum Operation: String { case acc, jmp, nop }
-    let op: Operation
-    let arg: Int
+    var operation: Operation
+    let argument: Int
 }
 
 extension Instruction {
     init?<S: StringProtocol>(_ str: S) {
         let parts = str.components(separatedBy: " ")
         guard parts.count == 2,
-              let op = Operation(rawValue: parts[0]),
-              let arg = Int(parts[1]) else {
+              let operation = Operation(rawValue: parts[0]),
+              let argument = Int(parts[1]) else {
             return nil
         }
-        self.init(op: op, arg: arg)
+        self.init(operation: operation, argument: argument)
     }
 
-    func flipped() -> Instruction {
-        switch self.op {
-            case .nop: return Instruction(op: .jmp, arg: arg)
-            case .jmp: return Instruction(op: .nop, arg: arg)
-            case .acc: return self
+    mutating func flip() {
+        switch operation {
+            case .nop: operation = .jmp
+            case .jmp: operation = .nop
+            case .acc: break
         }
     }
 }
 
-typealias ExecutionResult = (accumulator: Int, successful: Bool, executedIndicies: Set<Int>)
+typealias ExecutionResult = (successful: Bool, accumulator: Int, executedIndicies: Set<Int>)
 
 func execute(_ instructions: [Instruction]) -> ExecutionResult {
     var accumulator = 0
     var index = 0
     var executedIndicies: Set<Int> = []
 
-    while !executedIndicies.contains(index) && index < instructions.count {
+    while index >= 0 && index < instructions.count && !executedIndicies.contains(index) {
         executedIndicies.insert(index)
-        let arg = instructions[index].arg
-        switch instructions[index].op {
-            case .jmp: index += arg
-            case .acc: accumulator += arg; fallthrough
+        let instruction = instructions[index]
+        switch instruction.operation {
+            case .jmp: index += instruction.argument
+            case .acc: accumulator += instruction.argument; fallthrough
             case .nop: index += 1
         }
 
     }
-    return (accumulator, index == instructions.count, executedIndicies)
+    return (index == instructions.count, accumulator, executedIndicies)
 }
 
 let instructions = input.split(separator: "\n").compactMap(Instruction.init)
 
-func partOne() {
-    let result = execute(instructions)
-    print(result.accumulator)
-}
+// part 1
+print("answer to part one: \(execute(instructions).accumulator)") // 1671
 
 // part 2
-
-func partTwo() -> Int? {
+func findCorrectedResult(_ instructions: [Instruction]) -> Int? {
     let result = execute(instructions)
-    for badInstructionIdx in result.executedIndicies {
-        let badInstruction = instructions[badInstructionIdx]
-        if badInstruction.op == .jmp || badInstruction.op == .nop {
-            var newInstructions = instructions
-            newInstructions[badInstructionIdx] = badInstruction.flipped()
-            let newResult = execute(newInstructions)
+    guard !result.successful else { return result.accumulator }
+
+    var instructions = instructions
+    for index in result.executedIndicies {
+        let operation = instructions[index].operation
+        if operation == .jmp || operation == .nop {
+            instructions[index].flip()
+
+            let newResult = execute(instructions)
             if newResult.successful {
                 return newResult.accumulator
+            } else {
+                instructions[index].flip() // flip back
             }
         }
     }
     return nil
 }
 
-print(partTwo())
+print("answer to part two: \(findCorrectedResult(instructions)!)") // 892
