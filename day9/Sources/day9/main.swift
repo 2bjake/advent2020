@@ -1,5 +1,7 @@
 import Foundation
 
+// part 1
+
 func hasPair(in values: Set<Int>, forSum sum: Int) -> Bool {
     for value in values {
         let rest = sum - value
@@ -10,40 +12,58 @@ func hasPair(in values: Set<Int>, forSum sum: Int) -> Bool {
     return false
 }
 
-let numbers = input.components(separatedBy: "\n").compactMap(Int.init)
+func findValueWithNoPair(in values: [Int]) -> Int? {
+    var subset = Set(values.prefix(25))
 
-func partOne() -> Int {
-    var values = Set(numbers.prefix(25))
-    var front = 0
-    var back = 25
+    var trailingIdx = 0
+    var leadingIdx = subset.count
 
-    while true {
-        guard hasPair(in: values, forSum: numbers[back]) else {
-            print("no pair for: \(numbers[back])")
-            return numbers[back]
+    while leadingIdx < values.count {
+        guard hasPair(in: subset, forSum: values[leadingIdx]) else {
+            return values[leadingIdx]
         }
-        values.remove(numbers[front])
-        values.insert(numbers[back])
-        front += 1
-        back += 1
+
+        subset.remove(values[trailingIdx])
+        trailingIdx += 1
+
+        subset.insert(values[leadingIdx])
+        leadingIdx += 1
     }
+    return nil
 }
 
-let target = partOne()
-var front = 0
-var back = 1
-var sum = numbers[front] + numbers[back]
-while true {
-    if sum == target {
-        let min = numbers[front...back].min()!
-        let max = numbers[front...back].max()!
-        print("answer to part two: \(min + max)")
-        break
-    } else if sum < target {
-        back += 1
-        sum += numbers[back]
-    } else {
-        sum -= numbers[front]
-        front += 1
+// part 2
+
+func findSumSlice(for target: Int, in values: [Int]) -> ArraySlice<Int> {
+    var trailingIdx = 0
+    var leadingIdx = 1
+    var sum = values[trailingIdx] + values[leadingIdx]
+
+    while leadingIdx < values.count {
+        if sum == target {
+            return values[trailingIdx...leadingIdx]
+        } else if sum < target {
+            leadingIdx += 1
+            sum += values[leadingIdx]
+        } else {
+            sum -= values[trailingIdx]
+            trailingIdx += 1
+        }
     }
+    return ArraySlice()
 }
+
+func sumMinMax(in values: ArraySlice<Int>) -> Int {
+    guard let min = values.min(), let max = values.max() else { return 0 }
+    return min + max
+}
+
+// solution
+
+let values = input.components(separatedBy: "\n").compactMap(Int.init)
+
+let target = findValueWithNoPair(in: values)!
+print("answer to part one: \(target)") // 731031916
+
+let sumSlice = findSumSlice(for: target, in: values)
+print("answer to part two: \(sumMinMax(in: sumSlice))") // 93396727
