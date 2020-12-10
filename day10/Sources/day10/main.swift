@@ -1,46 +1,37 @@
 import Foundation
 
-//extension Array {
-//    func element(at idx: Int) -> Element? {
-//        guard idx >= 0 && idx < count else { return nil }
-//        return self[idx]
-//    }
-//}
+var values = input.components(separatedBy: "\n").compactMap(Int.init).sorted()
+values.insert(0, at: 0) // add outlet
+values.append(values.last! + 3) // add device
 
-var adapters = input.components(separatedBy: "\n").compactMap(Int.init).sorted()
-adapters.insert(0, at: 0) // outlet
-adapters.append(adapters.last! + 3) // device
+// part 1
 
-var counts = Array(repeating: 0, count: 4)
+func calculateDifferenceProduct(in values: [Int]) -> Int {
+    var counts = [0, 0, 0, 0]
 
-for i in 1..<adapters.count {
-    let diff = adapters[i] - adapters[i - 1]
-    counts[diff] += 1
+    for i in 0..<(values.count - 1) {
+        let diff = values[i + 1] - values[i]
+        counts[diff] += 1
+    }
+
+    return counts[3] * counts[1]
 }
-//counts[adapters[0]] += 1 // difference between outlet and first adapter
-//counts[3] += 1 // difference between last adapater and device
 
-print(counts[3] * counts[1]) // 1848
+print("answer for part one: \(calculateDifferenceProduct(in: values))") // 1848
 
 // part 2
 
-func getNextsForAdapter(at idx: Int) -> [Int] {
-    let lower = idx + 1
-    let upper = idx + 3
-    let range = (lower...upper).clamped(to: 0...(adapters.count - 1))
+func calculateCombinations(in values: [Int]) -> Int {
+    var arrangementsFromJoltage = [Int: Int]()
+    arrangementsFromJoltage[values.last!] = 1
 
-    return adapters[range].filter { $0 - adapters[idx] <= 3 }
+    for i in (0..<(values.count - 1)).reversed() {
+        let curValue = values[i]
+        let nextValues = values.dropFirst(i + 1).prefix(3).filter { $0 - curValue <= 3 }
+        let arrangementCounts = nextValues.compactMap { arrangementsFromJoltage[$0] }
+        arrangementsFromJoltage[curValue] = arrangementCounts.reduce(0, +)
+    }
+    return arrangementsFromJoltage[values[0]]!
 }
 
-var optionsByJoltage = [Int: Int]()
-optionsByJoltage[adapters.last!] = 1
-
-
-for i in (0...(adapters.count - 2)).reversed() {
-    let nextAdapaters = getNextsForAdapter(at: i)
-    let optionCounts = nextAdapaters.compactMap { optionsByJoltage[$0] }
-    let options = optionCounts.reduce(0, +)
-    optionsByJoltage[adapters[i]] = options
-}
-
-print(optionsByJoltage[adapters[0]])
+print("answer to part 2: \(calculateCombinations(in: values))") // 8099130339328
