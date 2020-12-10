@@ -21,7 +21,7 @@ print("answer for part one: \(calculateDifferenceProduct(in: values))") // 1848
 
 // part 2
 
-func calculateCombinations(in values: [Int]) -> Int {
+func calculateArrangements(in values: [Int]) -> Int {
     var arrangementsFromJoltage = [Int: Int]()
     arrangementsFromJoltage[values.last!] = 1
 
@@ -34,4 +34,4 @@ func calculateCombinations(in values: [Int]) -> Int {
     return arrangementsFromJoltage[0]!
 }
 
-print("answer to part 2: \(calculateCombinations(in: values))") // 8099130339328
+print("answer to part 2: \(calculateArrangements(in: values))") // 8099130339328
