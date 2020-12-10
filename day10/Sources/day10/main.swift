@@ -31,7 +31,7 @@ func calculateCombinations(in values: [Int]) -> Int {
         let arrangementCounts = nextValues.compactMap { arrangementsFromJoltage[$0] }
         arrangementsFromJoltage[curValue] = arrangementCounts.reduce(0, +)
     }
-    return arrangementsFromJoltage[values[0]]!
+    return arrangementsFromJoltage[0]!
 }
 
 print("answer to part 2: \(calculateCombinations(in: values))") // 8099130339328
