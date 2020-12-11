@@ -1,67 +1,51 @@
-typealias Point = (x: Int, y: Int)
-
-extension Array {
-    subscript<T>(_ point: Point) -> T where Element == Array<T> {
-        get { self[point.y][point.x] }
-        set { self[point.y][point.x] = newValue }
-    }
+enum Space {
+    case floor, emptySeat, filledSeat
 }
 
-func calculateNeighbors<T>(of point: Point, clampedBy grid: [[T]]) -> [Point] {
-    var neighbors = [Point]()
-    for x in -1...1 {
-        for y in -1...1 {
-            let newPoint = Point(x: point.x + x, y: point.y + y)
-            if newPoint != point && grid.indices.contains(newPoint.y) && grid[0].indices.contains(newPoint.x) {
-                neighbors.append(newPoint)
-            }
+enum SeatingPreference {
+    case adjacent, lineOfSight
+
+    var maxNeighbors: Int { self == .adjacent ? 3 : 4 }
+}
+
+func determineNewSeating(_ spaces: [[Space]], withPreference preference: SeatingPreference) -> [[Space]] {
+    var newSeats = spaces
+    for point in spaces.allPoints where spaces[point] != .floor {
+        let neighbors: [Space]
+        if preference == .adjacent {
+            neighbors = spaces.adjacentElements(of: point)
+        } else {
+            neighbors = spaces.lineOfSightElements(of: point) { $0 != .floor }
         }
-    }
-    return neighbors
-}
 
-typealias Seats = [[Bool?]]
-
-
-func countOccupiedSeats(_ seats: [Bool?]) -> Int {
-    seats.filter { $0 == true }.count
-}
-func countOccupiedSeats(_ seats: Seats) -> Int {
-    countOccupiedSeats(seats.flatMap { $0 })
-}
-
-func determineNewSeating(_ seats: Seats) -> Seats {
-    var newSeats = seats
-    for x in 0..<seats[0].count {
-        for y in 0..<seats.count {
-            let point = Point(x, y)
-            if seats[point] != nil {
-                let neighbors = calculateNeighbors(of: point, clampedBy: seats).map { seats[$0] }
-                let occupiedNeighbors = countOccupiedSeats(neighbors)
-                if occupiedNeighbors == 0 {
-                    newSeats[point] = true
-                } else if occupiedNeighbors >= 4 {
-                    newSeats[point] = false
-                }
-            }
+        let filledCount = neighbors.count { $0 == .filledSeat }
+        if filledCount == 0 {
+            newSeats[point] = .filledSeat
+        } else if filledCount > preference.maxNeighbors {
+            newSeats[point] = .emptySeat
         }
     }
     return newSeats
 }
 
-var seats = input.split(separator: "\n").map { row in
-    row.map { $0 == "L" ? false : nil }
-}
-
-var lastCount = countOccupiedSeats(seats)
-for _ in 0..<1000 {
-    seats = determineNewSeating(seats)
-    let newCount = countOccupiedSeats(seats)
-    if newCount == lastCount {
-        break
-    } else {
-        lastCount = newCount
+func findStableFilledCount(in spaces: [[Space]], withPreference preference: SeatingPreference, maxIterations: Int = 1000) -> Int? {
+    var spaces = spaces
+    var previousCount = spaces.count { $0 == .filledSeat }
+    for _ in 0..<maxIterations {
+        spaces = determineNewSeating(spaces, withPreference: preference)
+        let currentCount = spaces.count { $0 == .filledSeat }
+        if currentCount == previousCount {
+            return currentCount
+        } else {
+            previousCount = currentCount
+        }
     }
+    return nil
 }
 
-print(lastCount)
+let spaces: [[Space]] = input.split(separator: "\n").map { row in
+    row.map { $0 == "L" ? .emptySeat : .floor }
+}
+
+print("answer to part one: \(findStableFilledCount(in: spaces, withPreference: .adjacent)!)") // 2472
+print("answer to part two: \(findStableFilledCount(in: spaces, withPreference: .lineOfSight)!)") // 2197
