@@ -1,7 +1,7 @@
 import Foundation
 
 enum Direction: Int {
-    case north = 0
+    case north
     case east
     case south
     case west
@@ -56,8 +56,42 @@ extension Action {
     }
 }
 
-typealias Instruction = (action: Action, value: Int)
+typealias Point = (x: Int, y: Int)
 
+func movePoint(_ point: inout Point, direction: Direction, units: Int) {
+    switch direction {
+        case .north:
+            point.y += units
+        case .east:
+            point.x += units
+        case .south:
+            point.y -= units
+        case .west:
+            point.x -= units
+    }
+}
+
+func rotatePoint(_ point: inout Point, degrees: Int) {
+    let eastRotatedTo = Direction.east + degrees
+    switch eastRotatedTo {
+        case .north:
+            point = Point(x: -point.y, y: point.x)
+        case .east:
+            break
+        case .south:
+            point = Point(x: point.y, y: -point.x)
+        case .west:
+            point = Point(x: -point.x, y: -point.y)
+    }
+}
+
+struct Ship {
+    var position = Point(0, 0)
+    var heading = Direction.east
+    var waypoint = Point(10, 1)
+}
+
+typealias Instruction = (action: Action, value: Int)
 
 let instructions: [Instruction] = input.split(separator: "\n").compactMap {
     guard let action = Action($0.first), let value = Int(String($0.dropFirst())) else {
@@ -66,43 +100,42 @@ let instructions: [Instruction] = input.split(separator: "\n").compactMap {
     return (action, value)
 }
 
-struct Ship {
-    typealias Point = (x: Int, y: Int)
-
-    var position = Point(0, 0)
-    var heading = Direction.east
-
-    mutating func move(_ direction: Direction, distance: Int) {
-        switch direction {
-            case .north:
-                position.x += distance
-            case .east:
-                position.y += distance
-            case .south:
-                position.x -= distance
-            case .west:
-                position.y -= distance
-        }
-    }
-
-    mutating func performInstruction(_ instruction: Instruction) {
+func partOne() {
+    var ship = Ship()
+    for instruction in instructions {
         switch instruction.action {
             case .moveDirection(let direction):
-                move(direction, distance: instruction.value)
+                movePoint(&ship.position, direction: direction, units: instruction.value)
             case .moveForward:
-                move(heading, distance: instruction.value)
+                movePoint(&ship.position, direction: ship.heading, units: instruction.value)
             case .turnLeft:
-                heading += -instruction.value
+                ship.heading += -instruction.value
             case .turnRight:
-                heading += instruction.value
+                ship.heading += instruction.value
         }
     }
-}
 
-var ship = Ship()
-for instruction in instructions {
-    ship.performInstruction(instruction)
+    print(abs(ship.position.x) + abs(ship.position.y)) // 381
 }
+partOne()
 
-print(abs(ship.position.x) + abs(ship.position.y))
+func partTwo() {
+    var ship = Ship()
+    for instruction in instructions {
+        switch instruction.action {
+            case .moveDirection(let direction):
+                movePoint(&ship.waypoint, direction: direction, units: instruction.value)
+            case .moveForward:
+                movePoint(&ship.position, direction: .east, units: ship.waypoint.x * instruction.value)
+                movePoint(&ship.position, direction: .north, units: ship.waypoint.y * instruction.value)
+            case .turnLeft:
+                rotatePoint(&ship.waypoint, degrees: -instruction.value)
+            case .turnRight:
+                rotatePoint(&ship.waypoint, degrees: instruction.value)
+        }
+    }
+
+    print(abs(ship.position.x) + abs(ship.position.y))
+}
+partTwo()
 
