@@ -1,94 +1,9 @@
 import Foundation
 
-enum Direction: Int {
-    case north
-    case east
-    case south
-    case west
-}
-
-extension Direction {
-    init?(_ char: Character) {
-        switch char {
-            case "N": self = .north
-            case "S": self = .south
-            case "E": self = .east
-            case "W": self = .west
-            default: return nil
-        }
-    }
-}
-
-func +(direction: Direction, degrees: Int) -> Direction {
-    var newRawDir = direction.rawValue + (degrees / 90)
-    newRawDir %= 4
-    if newRawDir < 0 {
-        newRawDir += 4
-    }
-    return Direction(rawValue: newRawDir)!
-}
-
-func +=(direction: inout Direction, degrees: Int) {
-    direction = direction + degrees
-}
-
-enum Action: Equatable {
-    case moveDirection(Direction)
-    case moveForward
-    case turnLeft
-    case turnRight
-}
-
-extension Action {
-    init?(_ char: Character?) {
-        guard let char = char else { return nil }
-        if let direction = Direction(char) {
-            self = .moveDirection(direction)
-        } else if char == "L" {
-            self = .turnLeft
-        } else if char == "R" {
-            self = .turnRight
-        } else if char == "F" {
-            self = .moveForward
-        } else {
-            return nil
-        }
-    }
-}
-
-typealias Point = (x: Int, y: Int)
-
-func movePoint(_ point: inout Point, direction: Direction, units: Int) {
-    switch direction {
-        case .north:
-            point.y += units
-        case .east:
-            point.x += units
-        case .south:
-            point.y -= units
-        case .west:
-            point.x -= units
-    }
-}
-
-func rotatePoint(_ point: inout Point, degrees: Int) {
-    let eastRotatedTo = Direction.east + degrees
-    switch eastRotatedTo {
-        case .north:
-            point = Point(x: -point.y, y: point.x)
-        case .east:
-            break
-        case .south:
-            point = Point(x: point.y, y: -point.x)
-        case .west:
-            point = Point(x: -point.x, y: -point.y)
-    }
-}
-
 struct Ship {
-    var position = Point(0, 0)
+    var position = Point(x: 0, y: 0)
     var heading = Direction.east
-    var waypoint = Point(10, 1)
+    var waypoint = Point(x: 10, y: 1)
 }
 
 typealias Instruction = (action: Action, value: Int)
@@ -105,9 +20,9 @@ func partOne() {
     for instruction in instructions {
         switch instruction.action {
             case .moveDirection(let direction):
-                movePoint(&ship.position, direction: direction, units: instruction.value)
+                ship.position.move(direction: direction, units: instruction.value)
             case .moveForward:
-                movePoint(&ship.position, direction: ship.heading, units: instruction.value)
+                ship.position.move(direction: ship.heading, units: instruction.value)
             case .turnLeft:
                 ship.heading += -instruction.value
             case .turnRight:
@@ -124,18 +39,18 @@ func partTwo() {
     for instruction in instructions {
         switch instruction.action {
             case .moveDirection(let direction):
-                movePoint(&ship.waypoint, direction: direction, units: instruction.value)
+                ship.waypoint.move(direction: direction, units: instruction.value)
             case .moveForward:
-                movePoint(&ship.position, direction: .east, units: ship.waypoint.x * instruction.value)
-                movePoint(&ship.position, direction: .north, units: ship.waypoint.y * instruction.value)
+                ship.position.move(direction: .east, units: ship.waypoint.x * instruction.value)
+                ship.position.move(direction: .north, units: ship.waypoint.y * instruction.value)
             case .turnLeft:
-                rotatePoint(&ship.waypoint, degrees: -instruction.value)
+                ship.waypoint.rotate(degrees: -instruction.value)
             case .turnRight:
-                rotatePoint(&ship.waypoint, degrees: instruction.value)
+                ship.waypoint.rotate(degrees: instruction.value)
         }
     }
 
-    print(abs(ship.position.x) + abs(ship.position.y))
+    print(abs(ship.position.x) + abs(ship.position.y)) // 28591
 }
 partTwo()
 
