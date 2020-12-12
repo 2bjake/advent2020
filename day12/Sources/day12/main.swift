@@ -1,11 +1,3 @@
-import Foundation
-
-struct Ship {
-    var position = Point(x: 0, y: 0)
-    var heading = Direction.east
-    var waypoint = Point(x: 10, y: 1)
-}
-
 typealias Instruction = (action: Action, value: Int)
 
 let instructions: [Instruction] = input.split(separator: "\n").compactMap {
@@ -15,42 +7,18 @@ let instructions: [Instruction] = input.split(separator: "\n").compactMap {
     return (action, value)
 }
 
-func partOne() {
+func partOne() -> Int{
     var ship = Ship()
-    for instruction in instructions {
-        switch instruction.action {
-            case .moveDirection(let direction):
-                ship.position.move(direction: direction, units: instruction.value)
-            case .moveForward:
-                ship.position.move(direction: ship.heading, units: instruction.value)
-            case .turnLeft:
-                ship.heading += -instruction.value
-            case .turnRight:
-                ship.heading += instruction.value
-        }
-    }
-
-    print(abs(ship.position.x) + abs(ship.position.y)) // 381
+    ship.absoluteNavigate(instructions: instructions)
+    return ship.distanceFromStart
 }
-partOne()
+print("answer to part one: \(partOne())") // 381
 
-func partTwo() {
+func partTwo() -> Int {
     var ship = Ship()
-    for instruction in instructions {
-        switch instruction.action {
-            case .moveDirection(let direction):
-                ship.waypoint.move(direction: direction, units: instruction.value)
-            case .moveForward:
-                ship.position.move(direction: .east, units: ship.waypoint.x * instruction.value)
-                ship.position.move(direction: .north, units: ship.waypoint.y * instruction.value)
-            case .turnLeft:
-                ship.waypoint.rotate(degrees: -instruction.value)
-            case .turnRight:
-                ship.waypoint.rotate(degrees: instruction.value)
-        }
-    }
-
-    print(abs(ship.position.x) + abs(ship.position.y)) // 28591
+    ship.waypointNavigate(instructions: instructions)
+    return ship.distanceFromStart
 }
-partTwo()
+print("answer to part two: \(partTwo())") // 28591
+
 

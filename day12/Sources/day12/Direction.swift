@@ -36,3 +36,11 @@ func +(direction: Direction, degrees: Int) -> Direction {
 func +=(direction: inout Direction, degrees: Int) {
     direction = direction + degrees
 }
+
+func -(direction: Direction, degrees: Int) -> Direction {
+    return direction + -degrees
+}
+
+func -=(direction: inout Direction, degrees: Int) {
+    direction = direction - degrees
+}

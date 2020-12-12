@@ -25,8 +25,8 @@ extension Point {
     }
 
     mutating func rotate(degrees: Int) {
-        let eastRotatedTo = Direction.east + degrees
-        switch eastRotatedTo {
+        let eastRotatesTo = Direction.east + degrees
+        switch eastRotatesTo {
             case .north:
                 self = Point(x: -y, y: x)
             case .east:
