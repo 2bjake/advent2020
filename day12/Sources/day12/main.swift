@@ -7,7 +7,7 @@ let instructions: [Instruction] = input.split(separator: "\n").compactMap {
     return (action, value)
 }
 
-func partOne() -> Int{
+func partOne() -> Int {
     var ship = Ship()
     ship.absoluteNavigate(instructions: instructions)
     return ship.distanceFromStart

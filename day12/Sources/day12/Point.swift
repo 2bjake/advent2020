@@ -13,28 +13,20 @@ struct Point {
 extension Point {
     mutating func move(direction: Direction, units: Int) {
         switch direction {
-            case .north:
-                y += units
-            case .east:
-                x += units
-            case .south:
-                y -= units
-            case .west:
-                x -= units
+            case .north: y += units
+            case .east: x += units
+            case .south: y -= units
+            case .west: x -= units
         }
     }
 
     mutating func rotate(degrees: Int) {
         let eastRotatesTo = Direction.east + degrees
         switch eastRotatesTo {
-            case .north:
-                self = Point(x: -y, y: x)
-            case .east:
-                break
-            case .south:
-                self = Point(x: y, y: -x)
-            case .west:
-                self = Point(x: -x, y: -y)
+            case .north: self = Point(x: -y, y: x)
+            case .east: break
+            case .south: self = Point(x: y, y: -x)
+            case .west: self = Point(x: -x, y: -y)
         }
     }
 }
