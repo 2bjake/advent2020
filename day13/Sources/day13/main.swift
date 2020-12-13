@@ -13,8 +13,6 @@ func partOne() {
 }
 partOne()
 
-typealias Pair = (offset: Int, id: Int?)
-
 func partTwo() {
     let incr = 937 * 17 * 23 * 29 * 37
     var cur = 100_000_000_000_000 / incr * incr
