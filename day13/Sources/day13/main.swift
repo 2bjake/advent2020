@@ -1,30 +1,23 @@
 import Foundation
 
-let parts = input.components(separatedBy: "\n")
-let time = Int(parts[0])!
-let entries = parts[1].components(separatedBy: ",")
-
 func partOne() {
-    let busIds = entries.compactMap(Int.init)
-    var bestBusId = busIds[0]
-    var bestWait = busIds[0] - time % busIds[0]
+    let parts = input.components(separatedBy: "\n")
+    let time = Int(parts[0])!
+    let busIds = parts[1].components(separatedBy: ",").compactMap(Int.init)
 
-    for busId in busIds {
-        let curWait = busId - time % busId
-        if curWait < bestWait {
-            bestWait = curWait
-            bestBusId = busId
-        }
-    }
+    let best = busIds
+        .map { (id: $0, wait: $0 - time % $0) }
+        .min { $0.wait < $1.wait }
 
-    print(bestBusId * bestWait)
+    print(best!.id * best!.wait)
 }
+partOne()
 
 typealias Pair = (offset: Int, id: Int?)
 
-func partTwo(start:Int, entries: [String]) {
+func partTwo() {
     let incr = 937 * 17 * 23 * 29 * 37
-    var cur = start / incr * incr
+    var cur = 100_000_000_000_000 / incr * incr
 
     while true {
         if (cur + 31) % 397 == 0 &&
@@ -38,4 +31,4 @@ func partTwo(start:Int, entries: [String]) {
     print(cur - 17)
 }
 
-partTwo(start: 100_000_000_000_000, entries: entries)
+partTwo()
