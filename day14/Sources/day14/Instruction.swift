@@ -9,7 +9,7 @@ import Regex
 
 enum Instruction {
     case mask(Mask)
-    case put(address: String, value: UInt64)
+    case put(address: UInt64, value: UInt64)
 }
 
 extension Instruction {
@@ -31,7 +31,8 @@ extension Instruction {
 
     private static func makePut(_ source: String) -> Self? {
         guard let putMatch = putRegex.findFirst(in: source),
-              let address = putMatch.group(named: address),
+              let addressStr = putMatch.group(named: address),
+              let address = UInt64(addressStr),
               let valueStr = putMatch.group(named: value),
               let value = UInt64(valueStr) else {
             return nil
