@@ -17,7 +17,7 @@ extension Instruction {
     private static let address = "address"
     private static let value = "value"
 
-    private static let maskRegex = try! Regex(pattern: #"mask = (.+)"#, groupNames: mask)
+    private static let maskRegex = try! Regex(pattern: "mask = (.+)", groupNames: mask)
     private static let putRegex = try! Regex(pattern: #"mem\[(\d+)\] = (\d+)"#, groupNames: address, value)
 
     private static func makeMask(_ source: String) -> Self? {
