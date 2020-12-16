@@ -16,26 +16,32 @@ func partOne() {
 }
 partOne()
 
-let validTickets = tickets.filter { validator.isValid($0) }
+func partTwo() {
+    let validTickets = tickets.filter { validator.isValid($0) }
 
-var validRulesByIndex: [Int: Set<String>] = validTickets.getColumns().enumerated().reduce(into: [:]) { result, value in
-    let validRules = validator.findValidRules(values: value.element)
-
-    result[value.offset] = Set(validRules.map(\.name))
-}
-
-var departureIndicies = [Int]()
-
-while departureIndicies.count < 6 {
-    let singleRuleEntry = validRulesByIndex.first { $0.value.count == 1 }!
-    let fieldName = singleRuleEntry.value.first!
-    if fieldName.contains("departure") {
-        departureIndicies.append(singleRuleEntry.key)
+    var matchingRulesByIndex: [Int: Set<String>] = validTickets.buildColumns().enumerated().reduce(into: [:]) { result, value in
+        let matchingRules = validator.findMatchingRules(for: value.element)
+        result[value.offset] = Set(matchingRules.map(\.name))
     }
-    for idx in validRulesByIndex.keys {
-        validRulesByIndex[idx]?.remove(fieldName)
-    }
-}
 
-let myTicketFields = myTicketData.components(separatedBy: ",").compactMap(Int.init)
-print(departureIndicies.map { myTicketFields[$0] }.reduce(1, *))
+    var departureFieldIndicies = [Int]()
+
+    while departureFieldIndicies.count < 6 {
+        let singleRuleEntry = matchingRulesByIndex.first { $0.value.count == 1 }!
+        let fieldName = singleRuleEntry.value.first!
+
+        if fieldName.contains("departure") {
+            departureFieldIndicies.append(singleRuleEntry.key)
+        }
+        matchingRulesByIndex[singleRuleEntry.key] = nil
+
+        for idx in matchingRulesByIndex.keys {
+            matchingRulesByIndex[idx]?.remove(fieldName)
+        }
+    }
+
+    let myTicketFields = myTicketData.components(separatedBy: ",").compactMap(Int.init)
+    let product = departureFieldIndicies.map { myTicketFields[$0] }.reduce(1, *)
+    print("answer to part two: \(product)") // 2325343130651
+}
+partTwo()

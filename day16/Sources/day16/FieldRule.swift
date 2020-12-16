@@ -27,7 +27,7 @@ struct FieldRule {
     }
 }
 
-func buildRules(_ source: String) -> [FieldRule] {
+func buildRules(from source: String) -> [FieldRule] {
     let fieldsRegex = try! Regex(pattern: #"(.*): (\d+)-(\d+) or (\d+)-(\d+)\n?"#)
     let matches = fieldsRegex.findAll(in: source)
     return matches.compactMap { match in

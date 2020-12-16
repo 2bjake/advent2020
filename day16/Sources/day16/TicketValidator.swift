@@ -5,22 +5,10 @@
 //  Created by Jake Foster on 12/16/20.
 //
 
-typealias Ticket = [Int]
-
-extension Array where Element: RandomAccessCollection, Element.Index == Int {
-    func getColumn(at idx: Index) -> [Element.Element] {
-        (0..<count).map { self[$0][idx] }
-    }
-
-    func getColumns() -> [[Element.Element]] {
-        (0..<self[0].count).map(getColumn)
-    }
-}
-
 struct TicketValidator {
     let rules: [FieldRule]
 
-    func findInvalidFields(in ticket: Ticket) -> [Int] {
+    func findInvalidFields(in ticket: [Int]) -> [Int] {
         ticket.filter { value in
             for rule in rules {
                 if rule.isValid(value) {
@@ -31,11 +19,12 @@ struct TicketValidator {
         }
     }
 
-    func isValid(_ ticket: Ticket) -> Bool {
+    func isValid(_ ticket: [Int]) -> Bool {
         findInvalidFields(in: ticket).isEmpty
     }
 
-    func findValidRules(values: [Int]) -> [FieldRule] {
+    // takes a list of values and returns rules where all values are valid
+    func findMatchingRules(for values: [Int]) -> [FieldRule] {
         rules.filter { rule in
             values.allSatisfy { value in
                 rule.isValid(value)
@@ -46,6 +35,6 @@ struct TicketValidator {
 
 extension TicketValidator {
     init(_ source: String) {
-        rules = buildRules(source)
+        rules = buildRules(from: source)
     }
 }
