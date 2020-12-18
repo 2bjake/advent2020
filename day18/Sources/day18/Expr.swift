@@ -66,7 +66,13 @@ extension Expr {
                 return (.plus(left, right), remainingTokens)
             case "*":
                 guard let left = stashed else { fatalError("missing left for '*'" ) }
-                let (right, remainingTokens) = subBuild(tokens.dropFirst())
+                var (right, remainingTokens) = subBuild(tokens.dropFirst())
+
+//                // perform lookahead for +
+//                while remainingTokens.first == "+" {
+//                    (right, remainingTokens) = subBuild(remainingTokens, stashed: right)
+//                }
+
                 return (.multiply(left, right), remainingTokens)
             case "(":
                 let parenSlice = getParenSlice(tokens)
