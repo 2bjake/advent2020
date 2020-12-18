@@ -41,7 +41,7 @@ extension Expr {
             var remainingTokens = tokens
             var expr: Expr?
             while !remainingTokens.isEmpty {
-                (expr, remainingTokens) = subBuild(remainingTokens, stashed: expr)
+                (expr, remainingTokens) = subBuild(remainingTokens, leftExpr: expr)
             }
             return expr!
         }
@@ -61,24 +61,24 @@ extension Expr {
             return slice[slice.startIndex+1..<current.startIndex]
         }
 
-        private func subBuild(_ tokens: ArraySlice<Character>, stashed: Expr? = nil) -> ParseResult {
+        private func subBuild(_ tokens: ArraySlice<Character>, leftExpr: Expr? = nil) -> ParseResult {
             guard let first = tokens.first else { fatalError("empty token stream") }
             switch first {
                 case "+":
-                    guard let left = stashed else { fatalError("missing left for '+'" ) }
-                    let (right, remainingTokens) = subBuild(tokens.dropFirst())
-                    return (.plus(left, right), remainingTokens)
+                    guard let leftExpr = leftExpr else { fatalError("missing left for '+'" ) }
+                    let (rightExpr, remainingTokens) = subBuild(tokens.dropFirst())
+                    return (.plus(leftExpr, rightExpr), remainingTokens)
                 case "*":
-                    guard let left = stashed else { fatalError("missing left for '*'" ) }
-                    var (right, remainingTokens) = subBuild(tokens.dropFirst())
+                    guard let leftExpr = leftExpr else { fatalError("missing left for '*'" ) }
+                    var (rightExpr, remainingTokens) = subBuild(tokens.dropFirst())
 
                     if !leftToRightPrecedence {
                         // perform lookahead for +
                         while remainingTokens.first == "+" {
-                            (right, remainingTokens) = subBuild(remainingTokens, stashed: right)
+                            (rightExpr, remainingTokens) = subBuild(remainingTokens, leftExpr: rightExpr)
                         }
                     }
-                    return (.multiply(left, right), remainingTokens)
+                    return (.multiply(leftExpr, rightExpr), remainingTokens)
                 case "(":
                     let parenSlice = getParenSlice(tokens)
                     let expr = build(parenSlice)
