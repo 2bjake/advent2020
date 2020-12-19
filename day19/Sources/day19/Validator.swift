@@ -10,13 +10,13 @@ struct Validator {
 
     private func findPrefixLengthMatches<S: StringProtocol>(of string: S, forClause clause: ArraySlice<String>) -> Set<Int> {
         guard let firstId = clause.first else { return [0] }
-        let firstPrefixLengths = findPrefixLengthMatches(of: string, forRuleId: firstId)
-        guard !firstPrefixLengths.isEmpty else { return [] }
 
         var result = Set<Int>()
-        for firstLength in firstPrefixLengths {
-            let restPrefixLengths = findPrefixLengthMatches(of: string.dropFirst(firstLength), forClause: clause.dropFirst())
-            for restLength in restPrefixLengths {
+
+        let firstLengths = findPrefixLengthMatches(of: string, forRuleId: firstId)
+        for firstLength in firstLengths {
+            let restLengths = findPrefixLengthMatches(of: string.dropFirst(firstLength), forClause: clause.dropFirst())
+            for restLength in restLengths {
                 result.insert(firstLength + restLength)
             }
         }
