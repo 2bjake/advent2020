@@ -10,13 +10,15 @@ import Foundation
 struct Pair<T> {
     let first: T
     let second: T?
+    let third: T?
 }
 
 extension Pair {
     init?(_ source: [T]) {
         guard let first = source.first else { return nil }
         let second = source.dropFirst().first
-        self.init(first: first, second: second)
+        let third = source.dropFirst(2).first
+        self.init(first: first, second: second, third: third)
     }
 }
 

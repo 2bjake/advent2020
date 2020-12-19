@@ -15,7 +15,14 @@ func findPrefixLengthMatches<S: StringProtocol>(of string: S, forClause clause: 
     for firstLength in firstPrefixLengths {
         let secondPrefixLengths = findPrefixLengthMatches(of: string.dropFirst(firstLength), forRuleId: secondId)
         for secondLength in secondPrefixLengths {
-            result.insert(firstLength + secondLength)
+            if let thirdId = clause.third {
+                let thirdPrefixLengths = findPrefixLengthMatches(of: string.dropFirst(firstLength + secondLength), forRuleId: thirdId)
+                for thirdLength in thirdPrefixLengths {
+                    result.insert(firstLength + secondLength + thirdLength)
+                }
+            } else {
+                result.insert(firstLength + secondLength)
+            }
         }
 
     }
