@@ -35,4 +35,8 @@ extension Edge: Hashable, Equatable {
     func hash(into hasher: inout Hasher) {
         hasher.combine(flipSet)
     }
+
+    func isExactMatch(with other: Edge) -> Bool {
+        value == other.value
+    }
 }
