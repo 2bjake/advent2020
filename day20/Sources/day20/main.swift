@@ -8,18 +8,7 @@ let tilesByEdge: [Edge: [Tile]] = tiles.reduce(into: [:]) { result, value in
     }
 }
 
-//print(tilesByEdge.values.map(\.count))
-
-let edgeTiles = Set(tilesByEdge.values.filter { $0.count == 1 }.flatMap { $0 })
-//print(edgeTiles.count)
-
-//let edgeTilesByEdge: [Edge: [Tile]] = edgeTiles.reduce(into: [:]) { result, value in
-//    for edge in value.edges {
-//        result[edge, default: []].append(value)
-//    }
-//}
-//
-//print(edgeTilesByEdge.values.map(\.count))
+var edgeTiles = Set(tilesByEdge.values.filter { $0.count == 1 }.flatMap { $0 })
 
 let edgeToCount: [Edge: Int] = edgeTiles.reduce(into: [:]) { result, value in
     for edge in value.edges {
@@ -33,4 +22,9 @@ let cornerTiles = edgeTiles.filter { tile in
     return true
 }
 
-print(cornerTiles.map(\.id).reduce(1, *))
+print("answer to part one: \(cornerTiles.map(\.id).reduce(1, *))") // 4006801655873
+
+edgeTiles.subtract(cornerTiles)
+
+var puzzle: [[Tile?]] = Array(repeating: Array(repeating: nil, count: 12), count: 12)
+

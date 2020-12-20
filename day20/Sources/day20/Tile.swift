@@ -7,27 +7,22 @@
 
 import Foundation
 
-struct Tile {
+struct Tile: Hashable {
     let id: Int
     let data: [[Character]]
-
-    var horizontalEdges: [Edge] {
-        guard let first = data.first, let last = data.last else { return [] }
-        return [Edge(first), Edge(last)]
-    }
-
-    var verticalEdges: [Edge] {
-        let first = data.buildColumn(at: 0)
-        let last = data.buildColumn(at: data[0].count - 1)
-        return [Edge(first), Edge(last)]
-    }
-
-    var edges: [Edge] {
-        horizontalEdges + verticalEdges
-    }
 }
 
-extension Tile: Hashable {}
+extension Tile {
+    var topEdge: Edge { Edge(data.first!) }
+    var bottomEdge: Edge { Edge(data.last!) }
+    var leftEdge: Edge { Edge(data.buildColumn(at: 0)) }
+    var rightEdge: Edge { Edge(data.buildColumn(at: data[0].count - 1)) }
+
+    var horizontalEdges: [Edge] { [topEdge, bottomEdge] }
+    var verticalEdges: [Edge] { [leftEdge, rightEdge] }
+
+    var edges: [Edge] { horizontalEdges + verticalEdges }
+}
 
 extension Tile {
     init(_ source: String) {
