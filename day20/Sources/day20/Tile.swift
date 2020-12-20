@@ -7,6 +7,8 @@
 
 import Foundation
 
+enum TileType { case edge, corner, regular }
+
 struct Tile: Hashable {
     let id: Int
     let data: [[Character]]
@@ -40,4 +42,8 @@ extension Tile {
         data = lines.dropFirst().map(Array.init)
 
     }
+}
+
+extension Tile: CustomStringConvertible {
+    var description: String { "\(id)" }
 }

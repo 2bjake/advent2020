@@ -7,30 +7,36 @@
 
 import Foundation
 
-enum TileType { case edge, corner, nonEdge }
+typealias TilesByEdge = [Edge: Set<Tile>]
+
+private func buildTilesByEdge(_ tiles: Set<Tile>) -> TilesByEdge {
+    let tilesByEdge: [Edge: Set<Tile>] = tiles.reduce(into: [:]) { result, value in
+        for edge in value.allEdges {
+            result[edge, default: []].insert(value)
+        }
+    }
+    return tilesByEdge
+}
 
 struct TileSorter {
+    var cornerTiles: Set<Tile> {
+        Set(tilesByTypeByEdge[.corner]?.values.flatMap { $0 } ?? [])
+    }
 
-    //private var tilesByType: [TileType: Set<Tile>]
-
-    var cornerTiles: Set<Tile>
-    var edgeTiles: Set<Tile>
-    var nonEdgeTiles: Set<Tile>
-
-    var tilesByEdge: [Edge: [Tile]]
+    private var tilesByTypeByEdge: [TileType: TilesByEdge]
 
     init(_ source: String) {
         let allTiles = Set(source.components(separatedBy: "\n\n").map(Tile.init))
 
-        tilesByEdge = allTiles.reduce(into: [:]) { result, value in
+        let tilesByEdge: [Edge: [Tile]] = allTiles.reduce(into: [:]) { result, value in
             for edge in value.allEdges {
                 result[edge, default: []].append(value)
             }
         }
 
-        edgeTiles = Set(tilesByEdge.values.filter { $0.count == 1 }.flatMap { $0 })
+        var edgeTiles = Set(tilesByEdge.values.filter { $0.count == 1 }.flatMap { $0 })
 
-        nonEdgeTiles = allTiles.subtracting(edgeTiles)
+        let nonEdgeTiles = allTiles.subtracting(edgeTiles)
 
         let edgeToCount: [Edge: Int] = edgeTiles.reduce(into: [:]) { result, value in
             for edge in value.allEdges {
@@ -38,15 +44,42 @@ struct TileSorter {
             }
         }
 
-        cornerTiles = edgeTiles.filter { tile in
+        let cornerTiles = edgeTiles.filter { tile in
             guard tile.horizontalEdges.compactMap({ edgeToCount[$0] }).reduce(0, +) == 3 else { return false }
             guard tile.verticalEdges.compactMap({ edgeToCount[$0] }).reduce(0, +) == 3 else { return false }
             return true
         }
         edgeTiles.subtract(cornerTiles)
+
+
+        tilesByTypeByEdge = [
+            .corner: buildTilesByEdge(cornerTiles),
+            .edge: buildTilesByEdge(edgeTiles),
+            .regular: buildTilesByEdge(nonEdgeTiles)
+        ]
     }
 
-//    mutating func removeTile(_ type: TileType, matching: Tile, edge: Edge.Side) -> Tile? {
-//
-//    }
+    mutating func removeEdge(_ edge: Edge) {
+        tilesByTypeByEdge[.corner]?[edge] = nil
+        tilesByTypeByEdge[.edge]?[edge] = nil
+        tilesByTypeByEdge[.regular]?[edge] = nil
+    }
+
+    // returns the tile of the specified type which matches an edge of the specified tile.
+    // NOTE: if a match is found, the edge is removed from the sorter so it won't be found again
+    mutating func findMatch(_ type: TileType, matching: Tile) -> Tile? {
+        for edge in matching.allEdges {
+            if let tiles = tilesByTypeByEdge[type]?[edge], let tile = tiles.first(where: { $0 != matching }) {
+                removeEdge(edge)
+                return tile
+            }
+        }
+        return nil
+    }
+
+    mutating func removeCommonEdge(_ a: Tile, _ b: Tile) {
+        let commonEdges = Set(a.allEdges).intersection(b.allEdges)
+        guard let edge = commonEdges.first, commonEdges.count == 1 else { fatalError("didn't expect multiple common edges")}
+        removeEdge(edge)
+    }
 }
