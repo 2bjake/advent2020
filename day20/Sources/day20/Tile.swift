@@ -33,6 +33,12 @@ extension Tile {
     var verticalEdges: [Edge] { [leftEdge, rightEdge] }
 
     var allEdges: [Edge] { horizontalEdges + verticalEdges }
+
+    func commonEdge(with other: Tile) -> Edge? {
+        let commonEdges = Set(allEdges).intersection(other.allEdges)
+        guard let edge = commonEdges.first, commonEdges.count == 1 else { return nil }
+        return edge
+    }
 }
 
 extension Tile {

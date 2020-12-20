@@ -25,6 +25,8 @@ struct TileSorter {
 
     private var tilesByTypeByEdge: [TileType: TilesByEdge]
 
+    let edgeToCount: [Edge: Int]
+
     init(_ source: String) {
         let allTiles = Set(source.components(separatedBy: "\n\n").map(Tile.init))
 
@@ -57,6 +59,7 @@ struct TileSorter {
             .edge: buildTilesByEdge(edgeTiles),
             .regular: buildTilesByEdge(nonEdgeTiles)
         ]
+        self.edgeToCount = edgeToCount
     }
 
     mutating func removeEdge(_ edge: Edge) {
@@ -78,8 +81,7 @@ struct TileSorter {
     }
 
     mutating func removeCommonEdge(_ a: Tile, _ b: Tile) {
-        let commonEdges = Set(a.allEdges).intersection(b.allEdges)
-        guard let edge = commonEdges.first, commonEdges.count == 1 else { fatalError("didn't expect multiple common edges")}
+        guard let edge = a.commonEdge(with: b) else { fatalError("didn't find a common edge")}
         removeEdge(edge)
     }
 }
