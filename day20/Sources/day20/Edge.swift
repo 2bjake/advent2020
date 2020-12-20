@@ -10,6 +10,10 @@ struct Edge {
 }
 
 extension Edge {
+    enum Side { case top, bottom, left, right }
+}
+
+extension Edge {
     init(_ value: String) {
         self.value = value
     }

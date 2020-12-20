@@ -18,10 +18,19 @@ extension Tile {
     var leftEdge: Edge { Edge(data.buildColumn(at: 0)) }
     var rightEdge: Edge { Edge(data.buildColumn(at: data[0].count - 1)) }
 
+    func edge(_ side: Edge.Side) -> Edge {
+        switch side {
+            case .top: return topEdge
+            case .bottom: return bottomEdge
+            case .left: return leftEdge
+            case .right: return rightEdge
+        }
+    }
+
     var horizontalEdges: [Edge] { [topEdge, bottomEdge] }
     var verticalEdges: [Edge] { [leftEdge, rightEdge] }
 
-    var edges: [Edge] { horizontalEdges + verticalEdges }
+    var allEdges: [Edge] { horizontalEdges + verticalEdges }
 }
 
 extension Tile {
