@@ -15,6 +15,12 @@ struct Tile: Hashable {
 }
 
 extension Tile {
+    var dataWithoutBorder: [[Character]] {
+        data.dropFirst().dropLast().map { $0.dropFirst().dropLast() }
+    }
+}
+
+extension Tile {
     static let placeholder = Tile(id: -1, data: [])
 }
 

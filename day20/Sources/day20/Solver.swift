@@ -108,7 +108,7 @@ struct Solver {
         }
     }
 
-    func printPuzzle() {
+    func printPuzzleIds() {
         for row in puzzle {
             let values: [String] = row.map {
                 if $0 == .placeholder {
@@ -121,16 +121,19 @@ struct Solver {
         }
     }
 
-    func printFullPuzzle(showIds: Bool) {
-        let tileSize = puzzle[0][0].data.count
+    func printPuzzle(showIds: Bool, removeBorders: Bool) {
+        var tileSize = puzzle[0][0].data.count
+        if removeBorders { tileSize -= 2 }
+
         for row in puzzle {
             for i in 0..<tileSize {
                 var str = ""
                 for tile in row {
+                    let data = removeBorders ? tile.dataWithoutBorder : tile.data
                     if showIds {
                         str += "\(tile.id) "
                     }
-                    str += tile.data[i] + " "
+                    str += data[i] + " "
                 }
                 print(str)
             }
