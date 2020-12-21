@@ -19,7 +19,7 @@ extension Food {
 
 let foods = input.split(separator: "\n").compactMap(Food.init)
 
-func isAllergenFree(_ ingredient: String) -> Bool {
+func isInert(_ ingredient: String) -> Bool {
     var impossibleAllergen: Set<String> = []
     var possibleAllergen: Set<String> = []
 
@@ -42,15 +42,14 @@ func isAllergenFree(_ ingredient: String) -> Bool {
     return possibleAllergen.isEmpty
 }
 
-let allIngredients = foods.reduce(into: Set<String>()) { result, value in
-    result.formUnion(value.ingredients)
-}
+let allIngredients = foods.flatMap(\.ingredients)
+let ingredientsSet = Set(allIngredients)
+let inertIngredients = Set(ingredientsSet.filter(isInert))
 
-let inertIngredients = Set(allIngredients.filter(isAllergenFree))
+let inertIngredientCount = allIngredients.filter(inertIngredients.contains).count
+print("answer to part one: \(inertIngredientCount)") // 2317
 
-let count = foods.flatMap(\.ingredients).filter { inertIngredients.contains($0) }.count
-print("answer to part one: \(count)") // 2317
-
+// doesn't contain known inert ingredients
 var ingredientCountsByAllergen: [String: [String: Int]] = foods.reduce(into: [:]) { result, food in
     for allergen in food.allergens {
         var ingredientCounts = result[allergen, default: [:]]
@@ -59,19 +58,6 @@ var ingredientCountsByAllergen: [String: [String: Int]] = foods.reduce(into: [:]
         }
         result[allergen] = ingredientCounts
     }
-}
-//print(ingredientCountsByAllergen)
-
-let foodCountByAllergen: [String: Int] = foods.reduce(into: [:]) { result, food in
-    for allergen in food.allergens {
-        result[allergen, default: 0] += 1
-    }
-}
-
-var dangerousIngredientByAllergen = [String: String]()
-
-let allergens = foods.reduce(into: Set<String>()) { result, value in
-    result.formUnion(value.allergens)
 }
 
 func removeIngredient(_ ingredient: String) {
@@ -83,7 +69,16 @@ func removeIngredient(_ ingredient: String) {
     }
 }
 
-while dangerousIngredientByAllergen.count != allergens.count {
+let foodCountByAllergen: [String: Int] = foods.reduce(into: [:]) { result, food in
+    for allergen in food.allergens {
+        result[allergen, default: 0] += 1
+    }
+}
+
+let allergenCount = foods.reduce(into: Set<String>()) { $0.formUnion($1.allergens) }.count
+
+var dangerousIngredientByAllergen = [String: String]()
+while dangerousIngredientByAllergen.count != allergenCount {
     for (allergen, ingredientCounts) in ingredientCountsByAllergen {
         for (ingredient, count) in ingredientCounts {
             if count != foodCountByAllergen[allergen] {
@@ -98,4 +93,4 @@ while dangerousIngredientByAllergen.count != allergens.count {
 }
 
 let dangerousIngredientList = dangerousIngredientByAllergen.sorted { $0.key < $1.key }.map(\.value).joined(separator: ",")
-print(dangerousIngredientList)
+print(dangerousIngredientList) // kbdgs,sqvv,slkfgq,vgnj,brdd,tpd,csfmb,lrnz
