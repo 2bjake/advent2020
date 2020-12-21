@@ -19,58 +19,48 @@ extension Food {
 
 let foods = input.split(separator: "\n").compactMap(Food.init)
 
+// part 1
+
 func isInert(_ ingredient: String) -> Bool {
     var impossibleAllergen: Set<String> = []
     var possibleAllergen: Set<String> = []
 
     for food in foods {
         if food.ingredients.contains(ingredient) {
-            for allergen in food.allergens {
-                if !impossibleAllergen.contains(allergen) {
-                    possibleAllergen.insert(allergen)
-                }
-            }
+            possibleAllergen.formUnion(food.allergens.subtracting(impossibleAllergen))
         } else {
-            for allergen in food.allergens {
-                impossibleAllergen.insert(allergen)
-                possibleAllergen.remove(allergen)
-            }
+            impossibleAllergen.formUnion(food.allergens)
+            possibleAllergen.subtract(food.allergens)
         }
     }
     return possibleAllergen.isEmpty
 }
 
-let allIngredients = foods.flatMap(\.ingredients)
-let ingredientsSet = Set(allIngredients)
-let inertIngredients = Set(ingredientsSet.filter(isInert))
+func findInertIngredients() -> Set<String> {
+    let allIngredients = foods.flatMap(\.ingredients)
+    let inertIngredients = Set(Set(allIngredients).filter(isInert))
 
-let inertIngredientCount = allIngredients.filter(inertIngredients.contains).count
-print("answer to part one: \(inertIngredientCount)") // 2317
+    let count = allIngredients.filter(inertIngredients.contains).count
+    print("answer to part one: \(count)") // 2317
 
-// doesn't contain known inert ingredients
-var ingredientCountsByAllergen: [String: [String: Int]] = foods.reduce(into: [:]) { result, food in
-    for allergen in food.allergens {
-        var ingredientCounts = result[allergen, default: [:]]
-        for ingredient in food.ingredients.subtracting(inertIngredients) {
-            ingredientCounts[ingredient, default: 0] += 1
-        }
-        result[allergen] = ingredientCounts
-    }
+    return inertIngredients
 }
 
-func removeIngredient(_ ingredient: String) {
-    for allergen in ingredientCountsByAllergen.keys {
-        ingredientCountsByAllergen[allergen]?[ingredient] = nil
-        if ingredientCountsByAllergen[allergen]?.isEmpty == true {
-            ingredientCountsByAllergen[allergen] = nil
+let inertIngredients = findInertIngredients()
+
+// part 2
+
+func removeIngredient(_ ingredient: String, from dict: inout [String: [String: Int]]) {
+    for allergen in dict.keys {
+        dict[allergen]?[ingredient] = nil
+        if dict[allergen]?.isEmpty == true {
+            dict[allergen] = nil
         }
     }
 }
 
-func findDangerousIngredientsByAllergen() -> [String: String] {
+func findDangerousIngredients() -> [String: String] {
     var result = [String: String]()
-
-    let allergenCount = foods.reduce(into: Set<String>()) { $0.formUnion($1.allergens) }.count
 
     let foodCountByAllergen: [String: Int] = foods.reduce(into: [:]) { result, food in
         for allergen in food.allergens {
@@ -78,6 +68,18 @@ func findDangerousIngredientsByAllergen() -> [String: String] {
         }
     }
 
+    // doesn't contain known inert ingredients
+    var ingredientCountsByAllergen: [String: [String: Int]] = foods.reduce(into: [:]) { result, food in
+        for allergen in food.allergens {
+            var ingredientCounts = result[allergen, default: [:]]
+            for ingredient in food.ingredients.subtracting(inertIngredients) {
+                ingredientCounts[ingredient, default: 0] += 1
+            }
+            result[allergen] = ingredientCounts
+        }
+    }
+
+    let allergenCount = foods.reduce(into: Set<String>()) { $0.formUnion($1.allergens) }.count
     while result.count != allergenCount {
         for (allergen, ingredientCounts) in ingredientCountsByAllergen {
             for (ingredient, count) in ingredientCounts {
@@ -87,13 +89,12 @@ func findDangerousIngredientsByAllergen() -> [String: String] {
             }
             if ingredientCountsByAllergen[allergen]?.count == 1, let ingredient = ingredientCountsByAllergen[allergen]?.keys.first {
                 result[allergen] = ingredient
-                removeIngredient(ingredient)
+                removeIngredient(ingredient, from: &ingredientCountsByAllergen)
             }
         }
     }
     return result
 }
 
-let dangerousIngredientsByAllergen = findDangerousIngredientsByAllergen()
-let dangerousIngredientsList = dangerousIngredientsByAllergen.sorted { $0.key < $1.key }.map(\.value).joined(separator: ",")
-print(dangerousIngredientsList) // kbdgs,sqvv,slkfgq,vgnj,brdd,tpd,csfmb,lrnz
+let dangerousIngredients = findDangerousIngredients().sorted { $0.key < $1.key }.map(\.value).joined(separator: ",")
+print(dangerousIngredients) // kbdgs,sqvv,slkfgq,vgnj,brdd,tpd,csfmb,lrnz
