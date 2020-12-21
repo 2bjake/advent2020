@@ -60,8 +60,6 @@ func removeIngredient(_ ingredient: String, from dict: inout [String: [String: I
 }
 
 func findDangerousIngredients() -> [String: String] {
-    var result = [String: String]()
-
     let foodCountByAllergen: [String: Int] = foods.reduce(into: [:]) { result, food in
         for allergen in food.allergens {
             result[allergen, default: 0] += 1
@@ -79,6 +77,7 @@ func findDangerousIngredients() -> [String: String] {
         }
     }
 
+    var result = [String: String]()
     let allergenCount = foods.reduce(into: Set<String>()) { $0.formUnion($1.allergens) }.count
     while result.count != allergenCount {
         for (allergen, ingredientCounts) in ingredientCountsByAllergen {
