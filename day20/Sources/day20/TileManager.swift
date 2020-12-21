@@ -7,7 +7,7 @@
 
 import Foundation
 
-typealias TilesByEdge = [Edge: Set<Tile>]
+private typealias TilesByEdge = [Edge: Set<Tile>]
 
 private func buildTilesByEdge(_ tiles: Set<Tile>) -> TilesByEdge {
     let tilesByEdge: [Edge: Set<Tile>] = tiles.reduce(into: [:]) { result, value in
@@ -38,8 +38,7 @@ struct TileManager {
         Set(tilesByTypeByEdge[.corner]?.values.flatMap { $0 } ?? [])
     }
 
-    private var tilesByTypeByEdge: [TileType: TilesByEdge]
-
+    private var tilesByTypeByEdge: [Tile.Kind: TilesByEdge]
     private let edgeToCount: [Edge: Int]
 
     init(_ source: String) {
@@ -62,10 +61,8 @@ struct TileManager {
             .regular: buildTilesByEdge(nonEdgeTiles)
         ]
 
-        self.edgeToCount = allTiles.reduce(into: [:]) { result, value in
-            for edge in value.allEdges {
+        self.edgeToCount = allTiles.flatMap { $0.allEdges }.reduce(into: [:]) { result, edge in
                 result[edge, default: 0] += 1
-            }
         }
     }
 
@@ -77,7 +74,7 @@ struct TileManager {
 
     // returns the tile of the specified type which matches an edge of the specified tile.
     // NOTE: if a match is found, the edge is removed from the sorter so it won't be found again
-    mutating func findMatch(_ type: TileType, matching: Tile) -> Tile? {
+    mutating func findMatch(_ type: Tile.Kind, matching: Tile) -> Tile? {
         for edge in matching.allEdges {
             if let tiles = tilesByTypeByEdge[type]?[edge], let tile = tiles.first(where: { $0 != matching }) {
                 removeEdge(edge)

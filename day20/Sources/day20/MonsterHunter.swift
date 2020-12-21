@@ -19,7 +19,7 @@ struct MonsterHunter {
     private static var monsterSize: Int { patternIdx.flatMap { $0 }.count }
 
     private static func processTiles(_ tiles: [[Tile]]) -> [[Character]] {
-        let tileSize = tiles[0][0].data.count - 2
+        let tileSize = tiles[0][0].size - 2
 
         var result = [[Character]]()
         for row in tiles {

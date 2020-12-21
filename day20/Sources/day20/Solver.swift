@@ -10,7 +10,9 @@ import Foundation
 struct Solver {
     var puzzle: [[Tile]]
     private var tiles: TileManager
+}
 
+extension Solver {
     init(tiles: TileManager, size: Int) {
         puzzle = Array(repeating: Array(repeating: .placeholder, count: size), count: size)
         self.tiles = tiles
@@ -64,7 +66,7 @@ struct Solver {
         }
     }
 
-    mutating func fixTopEdgeOrientation() {
+    mutating func adjustTopEdgeOrientation() {
         let cornerIdx = puzzle.count - 1
         for i in 1..<cornerIdx {
             let edge = tiles.findOutsideEdges(of: puzzle[0][i]).first!
@@ -77,7 +79,7 @@ struct Solver {
         }
     }
 
-    mutating func fixLeftEdgeOrientation() {
+    mutating func adjustLeftEdgeOrientation() {
         let cornerIdx = puzzle.count - 1
         for i in 1..<cornerIdx {
             let edge = tiles.findOutsideEdges(of: puzzle[i][0]).first!
@@ -90,7 +92,7 @@ struct Solver {
         }
     }
 
-    mutating func fixRowOrientation(rowIdx: Int) {
+    mutating func adjustRowOrientation(rowIdx: Int) {
         for i in 1..<puzzle.count {
             puzzle[rowIdx][i].orientWith(top: puzzle[rowIdx - 1][i].bottomEdge, left: puzzle[rowIdx][i - 1].rightEdge)
         }
@@ -101,35 +103,31 @@ struct Solver {
         let right = puzzle[0][0].commonEdge(with: puzzle[0][1])!    
         puzzle[0][0].orientWith(bottom: bottom, right: right)
 
-        fixTopEdgeOrientation()
-        fixLeftEdgeOrientation()
+        adjustTopEdgeOrientation()
+        adjustLeftEdgeOrientation()
         for i in 1..<puzzle.count {
-            fixRowOrientation(rowIdx: i)
+            adjustRowOrientation(rowIdx: i)
         }
     }
+}
 
+extension Solver {
     func printPuzzleIds() {
         for row in puzzle {
-            let values: [String] = row.map {
-                if $0 == .placeholder {
-                    return "----"
-                } else {
-                    return "\($0.id)"
-                }
-            }
-            print(values)
+            let ids = row.map { $0 == .placeholder ? "----" : String($0.id) }
+            print(ids)
         }
     }
 
     func printPuzzle(showIds: Bool, removeBorders: Bool) {
-        var tileSize = puzzle[0][0].data.count
+        var tileSize = puzzle[0][0].size
         if removeBorders { tileSize -= 2 }
 
         for row in puzzle {
             for i in 0..<tileSize {
                 var str = ""
                 for tile in row {
-                    let data = removeBorders ? tile.dataWithoutBorder : tile.data
+                    let data = removeBorders ? tile.dataWithoutBorder : tile.dataWithBorder
                     if showIds {
                         str += "\(tile.id) "
                     }

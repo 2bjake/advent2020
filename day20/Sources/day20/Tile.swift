@@ -7,21 +7,31 @@
 
 import Foundation
 
-enum TileType { case edge, corner, regular }
-
 struct Tile: Hashable {
-    let id: Int
-    var data: [[Character]]
-}
+    enum Kind { case edge, corner, regular }
 
-extension Tile {
-    var dataWithoutBorder: [[Character]] {
-        data.dropFirst().dropLast().map { $0.dropFirst().dropLast() }
-    }
+    let id: Int
+    private var data: [[Character]]
 }
 
 extension Tile {
     static let placeholder = Tile(id: -1, data: [])
+
+    var size: Int { data.count }
+
+    var dataWithBorder: [[Character]] {
+        data
+    }
+
+    var dataWithoutBorder: [[Character]] {
+        data.dropFirst().dropLast().map { $0.dropFirst().dropLast() }
+    }
+
+    init(_ source: String) {
+        let lines = source.components(separatedBy: "\n")
+        id = Int(lines.first!.dropFirst(5).prefix(4))!
+        data = lines.dropFirst().map(Array.init)
+    }
 }
 
 extension Tile {
@@ -49,9 +59,7 @@ extension Tile {
         guard let edge = commonEdges.first, commonEdges.count == 1 else { return nil }
         return edge
     }
-}
 
-extension Tile {
     mutating func orientWith(top: Edge, left: Edge) {
         rotateEdge(top, to: .top)
         if leftEdge != left {
@@ -79,17 +87,4 @@ extension Tile {
     mutating func flipHorizontally() {
         data.flipHorizontally()
     }
-}
-
-extension Tile {
-    init(_ source: String) {
-        let lines = source.components(separatedBy: "\n")
-        id = Int(lines.first!.dropFirst(5).prefix(4))!
-        data = lines.dropFirst().map(Array.init)
-
-    }
-}
-
-extension Tile: CustomStringConvertible {
-    var description: String { "\(id)" }
 }

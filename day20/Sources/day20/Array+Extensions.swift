@@ -11,11 +11,6 @@ extension Array where Element: RandomAccessCollection, Element.Index == Int {
     func buildColumn(at idx: Index) -> [Element.Element] {
         (0..<count).map { self[$0][idx] }
     }
-
-    func buildColumns() -> [[Element.Element]] {
-        guard !isEmpty else { return [[]] }
-        return (0..<self[0].count).map(buildColumn)
-    }
 }
 
 extension Array where Element: RandomAccessCollection & MutableCollection, Element.Index == Int {
@@ -50,21 +45,12 @@ extension Array where Element: RandomAccessCollection & MutableCollection, Eleme
         flip(horizontally: true)
     }
 
-    private mutating func preRotate() {
+    mutating func rotateLeft() {
         for cur in 0..<count {
-            for i in 0..<count-cur {
+            for i in 0..<(count - cur) {
                 swapAt(cur, cur + i, cur + i, cur)
             }
         }
-    }
-
-    mutating func rotateRight() {
-        preRotate()
-        flipVertically()
-    }
-
-    mutating func rotateLeft() {
-        preRotate()
         flipHorizontally()
     }
 }
