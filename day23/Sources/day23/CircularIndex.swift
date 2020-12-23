@@ -23,10 +23,15 @@ func +=(idx: inout CircularIndex, value: Int) {
     idx = idx + value
 }
 
-extension Array {
+extension RandomAccessCollection where Index == Int {
     subscript(_ idx: CircularIndex) -> Element {
+        get { self[idx.value] }
+    }
+
+    subscript(_ idx: CircularIndex) -> Element where Self: MutableCollection {
         get { self[idx.value] }
         set { self[idx.value] = newValue }
     }
 }
+
 
