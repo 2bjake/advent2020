@@ -1,5 +1,5 @@
 
-enum Direction: String {
+enum Direction: String, CaseIterable {
     case east = "e"
     case southeast = "se"
     case southwest = "sw"
@@ -8,89 +8,106 @@ enum Direction: String {
     case northeast = "ne"
 }
 
-enum Color { case white, black }
-
-struct Point: Hashable {
+struct Coordinates: Hashable {
     var x: Int
     var y: Int
-
-    init(_ x: Int, _ y: Int) {
-        self.x = x
-        self.y = y
-    }
-
-    static let origin = Point(0, 0)
 }
 
-// (0, 0) -> west -> (-1, 0)
-// (0, 0) -> east -> (1, 0)
-// (0, 0) -> northwest -> (-1, 1)
-// (0, 0) -> northeast -> (0, 1)
-// (0, 0) -> southwest -> (0, -1)
-// (0, 0) -> southeast -> (1, -1)
+extension Coordinates {
+    static let origin = Coordinates(x: 0, y: 0)
 
-extension Point {
-    func newPoint(in direction: Direction) -> Point {
+    var allNeighbors: [Coordinates] {
+        Direction.allCases.map { newCoordinates(heading: $0) }
+    }
+
+    func newCoordinates(heading direction: Direction) -> Coordinates {
         switch direction {
-            case .west:      return Point(x - 1, y + 0)
-            case .east:      return Point(x + 1, y + 0)
-            case .northwest: return Point(x - 1, y + 1)
-            case .northeast: return Point(x + 0, y + 1)
-            case .southwest: return Point(x + 0, y - 1)
-            case .southeast: return Point(x + 1, y - 1)
+            case .west:      return Coordinates(x: x - 1, y: y + 0)
+            case .east:      return Coordinates(x: x + 1, y: y + 0)
+            case .northwest: return Coordinates(x: x - 1, y: y + 1)
+            case .northeast: return Coordinates(x: x + 0, y: y + 1)
+            case .southwest: return Coordinates(x: x + 0, y: y - 1)
+            case .southeast: return Coordinates(x: x + 1, y: y - 1)
         }
     }
 }
 
-class Tile {
-    var color: Color = .white
-    var neighbors: [Direction: Tile] = [:]
-    var coordinates: Point
+enum Color { case white, black }
 
-    init(coordinates: Point) {
-        self.coordinates = coordinates
-    }
+struct Tile {
+    var coordinates: Coordinates
+    var color: Color = .white
 }
 
 extension Tile {
-    func flip() {
-        switch color {
-            case .white: color = .black
-            case .black: color = .white
-        }
+    func flipped() -> Tile {
+        Tile(coordinates: coordinates, color: color == .black ? .white : .black)
     }
 }
-
-var startTile = Tile(coordinates: .origin)
-var tilesByCoords = [Point.origin: startTile]
 
 func removeFirstDirection(in array: inout [Character]) -> Direction {
     let first = array.removeFirst()
     if let direction = Direction(rawValue: String(first)) {
         return direction
-    } else {
-        let second = array.removeFirst()
-        return Direction(rawValue: "\(first)\(second)")!
     }
+    let second = array.removeFirst()
+    return Direction(rawValue: "\(first)\(second)")!
 }
+
+var tilesByCoords = [Coordinates.origin: Tile(coordinates: .origin)]
 
 func processLine(_ line: [Character]) {
     var line = line
-    var currentTile = startTile
+    var currentCoords = Coordinates.origin
     while !line.isEmpty {
         let direction = removeFirstDirection(in: &line)
-        if currentTile.neighbors[direction] == nil {
-            let newPoint = currentTile.coordinates.newPoint(in: direction)
-            let newTile = tilesByCoords[newPoint, default: Tile(coordinates: newPoint)]
-            currentTile.neighbors[direction] = newTile
-            tilesByCoords[newPoint] = newTile
+        let newCoords = currentCoords.newCoordinates(heading: direction)
+        if tilesByCoords[newCoords] == nil {
+            tilesByCoords[newCoords] = Tile(coordinates: newCoords)
         }
-        currentTile = currentTile.neighbors[direction]!
+        currentCoords = newCoords
     }
-    currentTile.flip()
+    tilesByCoords[currentCoords] = tilesByCoords[currentCoords]?.flipped()
 }
 
 input.split(separator: "\n").map(Array.init).forEach(processLine)
 
-let count = tilesByCoords.values.filter { $0.color == .black }.count
-print(count)
+func countBlackTiles() -> Int {
+    tilesByCoords.values.filter { $0.color == .black }.count
+}
+
+func partOne() {
+    print("answer to part one: \(countBlackTiles())") // 411
+}
+partOne()
+
+func flipTiles() {
+    var newTiles = tilesByCoords
+    for (coords, tile) in tilesByCoords {
+        let neighbors = coords.allNeighbors.compactMap { tilesByCoords[$0] }
+        let blackCount = neighbors.filter { $0.color == .black }.count
+
+        let shouldFlip =
+            (tile.color == .black && (blackCount == 0 || blackCount > 2)) ||
+            (tile.color == .white && blackCount == 2)
+
+        if shouldFlip { newTiles[coords] = tile.flipped() }
+    }
+    tilesByCoords = newTiles
+}
+
+func fillEdges() {
+    let allCoords = Set(tilesByCoords.keys.flatMap(\.allNeighbors))
+    for coords in allCoords where tilesByCoords[coords] == nil {
+        tilesByCoords[coords] = Tile(coordinates: coords)
+    }
+}
+
+func partTwo() {
+    for _ in 0..<100 {
+        fillEdges()
+        flipTiles()
+    }
+    print("answer to part two: \(countBlackTiles())") // 4092
+}
+partTwo()
