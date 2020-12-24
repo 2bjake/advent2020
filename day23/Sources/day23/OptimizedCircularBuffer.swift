@@ -40,8 +40,6 @@ struct OptimizedCircularBuffer {
 }
 
 extension OptimizedCircularBuffer {
-
-    // O(n) because of firstIndex(of:)
     func getNext(_ n: Int, after: Int? = nil) -> [Int] {
         let baseIndex: CircularIndex
         if let after = after, let index = buffer.firstIndex(of: after) {
@@ -52,7 +50,6 @@ extension OptimizedCircularBuffer {
         return (1...n).map { buffer[baseIndex + $0] }
     }
 
-    // O(1)
     func findDestinationValue(moving: [Int]) -> Int {
         var candidate = buffer[currentIndex]
         repeat {
@@ -66,13 +63,10 @@ extension OptimizedCircularBuffer {
     }
 
     mutating func move(_ n: Int) {
-        let time_start = Date()
-        let valuesToBeMoved = getNext(n) // O(n) - takes ~8 secs for 1_000_000 values
+        let valuesToBeMoved = getNext(n)
 
-        let time_afterValuesToBeMoved = Date()
-        let destinationValue = findDestinationValue(moving: valuesToBeMoved) // O(1)
+        let destinationValue = findDestinationValue(moving: valuesToBeMoved)
         let destinationIndex = buffer.firstIndex(of: destinationValue)!
-        let time_afterFindDestinationIndex = Date()
 
         let bufferCount = buffer.count
         buffer.withUnsafeMutableBufferPointer {
@@ -107,15 +101,6 @@ extension OptimizedCircularBuffer {
             }
             self.currentIndex = CircularIndex(cIndex, count: bufferCount)
         }
-
-        let time_afterShift = Date()
         currentIndex += 1
-
-        if #available(OSX 10.15, *) {
-            print("\(time_start.distance(to: time_afterValuesToBeMoved)) sec to findValuesToBeMoved")
-            print("\(time_afterValuesToBeMoved.distance(to: time_afterFindDestinationIndex)) sec to findDestinationIndex")
-            print("\(time_afterFindDestinationIndex.distance(to: time_afterShift)) sec to findValuesToBeMoved")
-            print("================")
-        }
     }
 }

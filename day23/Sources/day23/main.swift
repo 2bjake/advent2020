@@ -2,7 +2,6 @@
 import Foundation
 
 let input = "326519478"
-//let input = "389125467" // test input
 
 func partOne() {
     let values = input.compactMap { Int(String($0)) }
@@ -15,33 +14,30 @@ func partOne() {
 }
 partOne()
 
-func partTwo() {
-    let values = input.compactMap { Int(String($0)) }
-    var buffer = OptimizedCircularBuffer(values, fillingTo: 1_000_000)
-    for i in 0..<10_000_000 {
-        //print(i)
-        buffer.move(3)
+func findDestinationNode(of currentNode: Node) -> Node {
+    let selectedValues = [currentNode.next.value, currentNode.next.next.value, currentNode.next.next.next.value]
+    var candidate = currentNode.lower!
+    while selectedValues.contains(candidate.value) {
+        candidate = candidate.lower
     }
-    let product = buffer.getNext(2, after: 1).reduce(1, *)
-    print("answer to part two: \(product)")
+    return candidate
+}
+
+func partTwo() {
+    let (frontNode, oneNode) = buildNodes(input)
+    var currentNode = frontNode
+
+    for _ in 0..<10_000_000 {
+        let firstSelectedNode = currentNode.next!
+        let lastSelectedNode = firstSelectedNode.next.next!
+        let destinationNode = findDestinationNode(of: currentNode)
+
+        currentNode.next = lastSelectedNode.next
+        lastSelectedNode.next = destinationNode.next
+        destinationNode.next = firstSelectedNode
+        currentNode = currentNode.next
+    }
+    let product = oneNode.next.value * oneNode.next.next.value
+    print("answer to part two: \(product)") // 44541319250
 }
 partTwo()
-
-
-//func copyMemory<T>(in bufferPointer: UnsafeMutableBufferPointer<T>, from sourceIndicies: ClosedRange<Int>, to destinationIndex: Int) {
-//    let size = MemoryLayout<T>.size
-//    let frontPointer = UnsafeMutableRawPointer(bufferPointer.baseAddress!)
-//    let sourcePointer = frontPointer + sourceIndicies.lowerBound * size
-//    let sourceLength = sourceIndicies.count * size
-//    let destinationPointer = frontPointer + destinationIndex * size
-//    destinationPointer.copyMemory(from: sourcePointer, byteCount: sourceLength)
-//}
-//
-//var a = ContiguousArray(repeating: 0, count: 20)
-//for i in 0..<a.count { a[i] = i }
-//print(a)
-//let count = a.count
-//a.withUnsafeMutableBufferPointer {
-//    copyMemory(in: $0, from: (2...count-1), to: 0)
-//}
-//print(a)

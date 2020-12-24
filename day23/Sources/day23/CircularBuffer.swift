@@ -26,7 +26,6 @@ extension CircularBuffer {
         return (1...n).map { buffer[baseIndex + $0] }
     }
 
-    // this can be optimized given that we know all numbers
     func findDestinationValue(moving: [Int]) -> Int {
         var candidate = buffer[currentIndex]
         repeat {
